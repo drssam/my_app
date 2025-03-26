@@ -5,7 +5,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns  
 import streamlit as st
 import plotly.express as px
+import warnings
 
+
+
+warnings.filterwarnings(action='ignore')
+  
 # Config
 pd.set_option('display.max_columns', None) 
 sns.set_style('darkgrid') 
