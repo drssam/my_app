@@ -7,8 +7,8 @@ import streamlit as st
 import plotly.express as px
 
 # Config
-pd.set_option('display.max_columns', None)  # Show all columns
-sns.set_style('darkgrid')  # Set visualization style
+pd.set_option('display.max_columns', None) 
+sns.set_style('darkgrid') 
 
 # Streamlit Config
 st.set_page_config(page_title="Used Cars Market", layout="wide")
@@ -57,77 +57,57 @@ min_year = int(df_vehicles['model_year'].min())
 max_year = int(df_vehicles['model_year'].max())
 selected_year = st.sidebar.slider('Select Model Year:', min_year, max_year, (min_year, max_year))
 
-# # Make Filter
-# unique_make = sorted(df_vehicles['make'].dropna().unique())
-# selected_car = st.sidebar.multiselect(
-#     'Select Car Make',  # More descriptive label
-#     unique_make,  # Options
-#     default=unique_make,  # Default selects all makes
-#     placeholder="Choose car makes..."  # A hint inside the dropdown
-# )
-
 # Make Filter
 unique_make = sorted(df_vehicles['make'].dropna().unique())
-# selected_makes = st.sidebar.multiselect('Select Car Make:', unique_makes, unique_makes)
+
 selected_car = st.sidebar.multiselect(
-    'Select Car Make',  # More descriptive label
-    unique_make,  # Options
-    default=None,  # No preselected cars (user selects what they need)
-    placeholder="Choose car makes..."  # A hint inside the dropdown
+    'Select Car Make',  
+    unique_make,  
+    default=None,  
+    placeholder="Choose car makes..."  
 )
 
 # Model Filter
 if selected_car:
-    # Get models related to the selected makes
     unique_model = sorted(df_vehicles[df_vehicles['make'].isin(selected_car)]['model'].dropna().unique())
 else:
-    unique_model = []  # If no make is selected, show no models
+    unique_model = []  
 
-# Add model filter (optional, based on selected make)
+# Add model filter 
 selected_models = st.sidebar.multiselect(
-    'Select Car Model',  # More descriptive label
-    unique_model,  # Options based on selected make(s)
-    default=None,  # No preselected cars (user selects what they need)
-    placeholder="Choose car model..."  # A hint inside the dropdown
+    'Select Car Model',  
+    unique_model,  
+    default=None,  
+    placeholder="Choose car model..."  
 )
 
-# Comparison Section (optional)
+# Comparison Section
 st.sidebar.header("Compare Cars")
 compare_cars = st.sidebar.radio(
     "Do you want to compare cars?",
-    ('No', 'Yes')  # Option to choose whether to compare or not
+    ('No', 'Yes')  
 )
 
-# # Apply Filters
-# df_filtered = df_vehicles[
-#     (df_vehicles['model_year'].between(selected_year[0], selected_year[1])) &  # Filter between selected years
-#     (df_vehicles['make'].isin(selected_car))  # Filter based on selected makes
-# ]
-
-# Initially, display the full table (if no filters are selected)
+# display full table
 if selected_car or selected_models:
     df_filtered = df_vehicles[
         (df_vehicles['make'].isin(selected_car) if selected_car else True) &
         (df_vehicles['model'].isin(selected_models) if selected_models else True)
     ]
 else:
-    df_filtered = df_vehicles  # No filters, show all cars
+    df_filtered = df_vehicles 
 
-    
-
-
-# If model is selected, further filter by model
+# If model is selected
 if selected_models:
     df_filtered = df_filtered[df_filtered['model'].isin(selected_models)]
 
-
-# Show Filtered Data
+# Filtered Data
 st.write(f"Showing {df_filtered.shape[0]} cars matching criteria")
 st.dataframe(df_filtered)
 
-# Handle Comparison Section
+# Comparison Section
 if compare_cars == 'Yes':
-    # Comparison logic (same as the previous implementation for car comparison)
+    # Comparison logic 
     st.sidebar.subheader("Select Cars for Comparison")
     car_1_index = st.sidebar.selectbox("Select the first car to compare", df_filtered.index)
     car_2_index = st.sidebar.selectbox("Select the second car to compare", df_filtered.index)
@@ -136,11 +116,10 @@ if compare_cars == 'Yes':
     car_1_row = df_filtered.loc[car_1_index]
     car_2_row = df_filtered.loc[car_2_index]
 
-    # Create comparison data for all attributes
     all_attributes = ['price', 'model_year', 'make', 'model', 'condition', 'cylinders', 'fuel', 
                       'odometer_miles', 'transmission', 'type', 'paint_color', 'is_4wd', 'listing_date', 'days_listed']
 
-    # Display Comparison Table
+    # Comparison Table
     comparison_df = pd.DataFrame({
         'Attribute': all_attributes,
         'Car 1': car_1_row[all_attributes].values,
@@ -149,48 +128,6 @@ if compare_cars == 'Yes':
 
     st.subheader(f"Comparison of {car_1_row['make']} {car_1_row['model']} and {car_2_row['make']} {car_2_row['model']}")
     st.dataframe(comparison_df)
-
-
-# # Compare cars sold
-# # Sidebar for Car Selection
-# st.sidebar.header("Compare Cars")
-# # Selecting cars from the filtered DataFrame based on make and model
-# car_1 = st.sidebar.selectbox("Select the first car to compare", df_filtered[['make', 'model']].drop_duplicates().values.tolist(), format_func=lambda x: f"{x[0]} {x[1]}")
-# car_2 = st.sidebar.selectbox("Select the second car to compare", df_filtered[['make', 'model']].drop_duplicates().values.tolist(), format_func=lambda x: f"{x[0]} {x[1]}")
-# car_3 = st.sidebar.selectbox("Select the third car to compare", df_filtered[['make', 'model']].drop_duplicates().values.tolist(), format_func=lambda x: f"{x[0]} {x[1]}")
-
-# # Check if valid selections are made
-# if car_1 is None or car_2 is None or car_3 is None:
-#     st.error("Please select all three cars to compare.")
-# else:
-#     # Fetch the selected rows for each car
-#     car_1_row = df_filtered[(df_filtered['make'] == car_1[0]) & (df_filtered['model'] == car_1[1])]
-#     car_2_row = df_filtered[(df_filtered['make'] == car_2[0]) & (df_filtered['model'] == car_2[1])]
-#     car_3_row = df_filtered[(df_filtered['make'] == car_3[0]) & (df_filtered['model'] == car_3[1])]
-
-
-# # If no car data is found (e.g., user selects invalid cars), show an error
-#     if car_1_row.empty or car_2_row.empty or car_3_row.empty:
-#         st.error("Invalid car selection. Please select valid cars from the list.")
-#     else:
-#         # Create comparison data for all attributes (without selection)
-#         all_attributes = ['price', 'model_year', 'make', 'model', 'condition', 'cylinders', 'fuel', 
-#                           'odometer_miles', 'transmission', 'type', 'paint_color', 'is_4wd', 'listing_date', 'days_listed']
-
-#         comparison_data = {
-#             'Attribute': all_attributes,
-#             car_1_row['make'].values[0] + ' ' + car_1_row['model'].values[0]: [car_1_row[attr].values[0] for attr in all_attributes],
-#             car_2_row['make'].values[0] + ' ' + car_2_row['model'].values[0]: [car_2_row[attr].values[0] for attr in all_attributes],
-#             car_3_row['make'].values[0] + ' ' + car_3_row['model'].values[0]: [car_3_row[attr].values[0] for attr in all_attributes]
-#         }
-
-#         # Convert to DataFrame for better display
-#         comparison_df = pd.DataFrame(comparison_data)
-
-#         # Display the comparison table
-#         st.header("Cars Comparison")
-#         st.write(comparison_df)
-
 
 #|###################################################|#
 #|************ Visualization ************|#
@@ -220,10 +157,6 @@ st.plotly_chart(fig2)
 fig3 = px.scatter(df_filtered, x="odometer_miles", y="price", color="make", title="Price vs Odometer", hover_data=['model_year', 'model'])
 st.plotly_chart(fig3, use_container_width=True)
 
-# Visualization - Scatter Plot of Price vs Odometer
-
-
-
 
 # Price vs Make 
 #st.header("Price Distribution by Make")
@@ -231,9 +164,8 @@ fig4 = px.box(df_filtered, x="make", y="price", title="Price Distribution by Mak
 st.plotly_chart(fig4)
 
 
-# Correlation Matrix for Numerical Features (Heatmap)
+# Correlation Matrix
 
-# 5. Correlation Matrix for Numerical Features (Heatmap)
 #st.header("Correlation Matrix for Numerical Features")
 numeric_df = df_filtered.select_dtypes(include=['float64', 'int64'])
 corr_matrix = numeric_df.corr()
