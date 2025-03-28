@@ -93,6 +93,61 @@ compare_cars = st.sidebar.radio(
     ('No', 'Yes')  
 )
 
+# # display full table
+# if selected_car or selected_models:
+#     df_filtered = df_vehicles[
+#         (df_vehicles['make'].isin(selected_car) if selected_car else True) &
+#         (df_vehicles['model'].isin(selected_models) if selected_models else True)
+#     ]
+# else:
+#     df_filtered = df_vehicles 
+
+# # If model is selected
+# if selected_models:
+#     df_filtered = df_filtered[df_filtered['model'].isin(selected_models)]
+
+# # Filtered Data
+# st.write(f"Showing {df_filtered.shape[0]} cars matching criteria")
+# st.dataframe(df_filtered)
+
+# # Comparison Section
+# if compare_cars == 'Yes':
+#     # Comparison logic 
+#     st.sidebar.subheader("Select Cars for Comparison")
+#     car_1_index = st.sidebar.selectbox("Select the first car to compare", df_filtered.index)
+#     car_2_index = st.sidebar.selectbox("Select the second car to compare", df_filtered.index)
+
+#     # Get selected car rows
+#     car_1_row = df_filtered.loc[car_1_index]
+#     car_2_row = df_filtered.loc[car_2_index]
+
+#########
+# list of car names (make and model) to display in the selectbox
+car_options = df_vehicles[['make', 'model']].apply(lambda x: f"{x['make']} {x['model']}", axis=1).tolist()
+
+# Select cars based on make and model (car name)
+car_1_name = st.sidebar.selectbox("Select the first car to compare", car_options)
+car_2_name = st.sidebar.selectbox("Select the second car to compare", car_options)
+
+# Get the indices of the selected cars
+car_1_index = selected_car[selected_car['make'] + ' ' + selected_car['model'] == car_1_name].index[0]
+car_2_index = selected_car[selected_car['make'] + ' ' + selected_car['model'] == car_2_name].index[0]
+
+# Get selected car rows
+car_1_row = selected_car.loc[car_1_index]
+car_2_row = selected_car.loc[car_2_index]
+
+all_attributes = ['price', 'model_year', 'make', 'model', 'condition', 'cylinders', 'fuel', 
+                  'odometer_miles', 'transmission', 'type', 'paint_color', 'is_4wd', 'listing_date', 'days_listed']
+
+# Comparison Table
+comparison_df = pd.DataFrame({
+    'Attribute': all_attributes,
+    car_1_name: car_1_row[all_attributes].values,
+    car_2_name: car_2_row[all_attributes].values
+})
+
+#############
 
 
 
@@ -105,81 +160,26 @@ compare_cars = st.sidebar.radio(
 
 
 
+#     # Get car make and model for column headers
+#     car_1_name = f"{car_1_row['make']} {car_1_row['model']}"
+#     car_2_name = f"{car_2_row['make']} {car_2_row['model']}"
+  
+#     all_attributes = ['price', 'model_year', 'make', 'model', 'condition', 'cylinders', 'fuel', 
+#                       'odometer_miles', 'transmission', 'type', 'paint_color', 'is_4wd', 'listing_date', 'days_listed']
 
+#     # Comparison Table
+#     comparison_df = pd.DataFrame({
+#         'Attribute': all_attributes,
+#         'Car 1': car_1_row[all_attributes].values,
+#         'Car 2': car_2_row[all_attributes].values
+#     })
 
+   # Explanatory Sentence
+explanation_text = f"The selected cars to be compared are: {car_1_name} and {car_2_name}. Below are a detailed comparison of both cars."
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# display full table
-if selected_car or selected_models:
-    df_filtered = df_vehicles[
-        (df_vehicles['make'].isin(selected_car) if selected_car else True) &
-        (df_vehicles['model'].isin(selected_models) if selected_models else True)
-    ]
-else:
-    df_filtered = df_vehicles 
-
-# If model is selected
-if selected_models:
-    df_filtered = df_filtered[df_filtered['model'].isin(selected_models)]
-
-# Filtered Data
-st.write(f"Showing {df_filtered.shape[0]} cars matching criteria")
-st.dataframe(df_filtered)
-
-# Comparison Section
-if compare_cars == 'Yes':
-    # Comparison logic 
-    st.sidebar.subheader("Select Cars for Comparison")
-    car_1_index = st.sidebar.selectbox("Select the first car to compare", df_filtered.index)
-    car_2_index = st.sidebar.selectbox("Select the second car to compare", df_filtered.index)
-
-    # Get selected car rows
-    car_1_row = df_filtered.loc[car_1_index]
-    car_2_row = df_filtered.loc[car_2_index]
-
-    all_attributes = ['price', 'model_year', 'make', 'model', 'condition', 'cylinders', 'fuel', 
-                      'odometer_miles', 'transmission', 'type', 'paint_color', 'is_4wd', 'listing_date', 'days_listed']
-
-    # Comparison Table
-    comparison_df = pd.DataFrame({
-        'Attribute': all_attributes,
-        'Car 1': car_1_row[all_attributes].values,
-        'Car 2': car_2_row[all_attributes].values
-    })
-
-    st.subheader(f"Comparison of {car_1_row['make']} {car_1_row['model']} and {car_2_row['make']} {car_2_row['model']}")
-    st.dataframe(comparison_df)
+st.subheader(f"Comparison of {car_1_row['make']} {car_1_row['model']} and {car_2_row['make']} {car_2_row['model']}")
+st.write(explanation_text)  # Explanatory sentence under the header
+st.dataframe(comparison_df)
 
 #|###################################################|#
 #|************ Visualization ************|#
@@ -187,39 +187,39 @@ if compare_cars == 'Yes':
 
 # Prices Histogram
 st.subheader("Price Distribution")
-fig_price = px.histogram(df_filtered, x='price', nbins=50, title="Distribution of Car Prices")
+fig_price = px.histogram(selected_car, x='price', nbins=50, title="Distribution of Car Prices")
 st.plotly_chart(fig_price, use_container_width=True)
 
 # Comparisons
 st.header("Comparisons' Plots")
 # Price vs Condition
-condition_selected = st.selectbox('Select condition to view price distribution', df_filtered['condition'].unique())
-fig1 = px.histogram(df_filtered[df_filtered['condition'] == condition_selected], x='price', color='condition',
+condition_selected = st.selectbox('Select condition to view price distribution', selected_car['condition'].unique())
+fig1 = px.histogram(selected_car[selected_car['condition'] == condition_selected], x='price', color='condition',
                     title=f"Price Distribution for {condition_selected} Condition")
 st.plotly_chart(fig1)
 
 # Price vs Age
 # st.header("Price vs Age")
-fig2 = px.scatter(df_filtered, x="car_age", y="price", color="make", title="Price vs Age")
+fig2 = px.scatter(selected_car, x="car_age", y="price", color="make", title="Price vs Age")
 st.plotly_chart(fig2)
 
 
 # Price vs Odometer
 #st.header("Price vs Odometer (per Miles)")
-fig3 = px.scatter(df_filtered, x="odometer_miles", y="price", color="make", title="Price vs Odometer", hover_data=['model_year', 'model'])
+fig3 = px.scatter(selected_car, x="odometer_miles", y="price", color="make", title="Price vs Odometer", hover_data=['model_year', 'model'])
 st.plotly_chart(fig3, use_container_width=True)
 
 
 # Price vs Make 
 #st.header("Price Distribution by Make")
-fig4 = px.box(df_filtered, x="make", y="price", title="Price Distribution by Make")
+fig4 = px.box(selected_car, x="make", y="price", title="Price Distribution by Make")
 st.plotly_chart(fig4)
 
 
 # Correlation Matrix
 
 #st.header("Correlation Matrix for Numerical Features")
-numeric_df = df_filtered.select_dtypes(include=['float64', 'int64'])
+numeric_df = selected_car.select_dtypes(include=['float64', 'int64'])
 corr_matrix = numeric_df.corr()
 plt.figure(figsize=(10, 8))
 sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt='.2f')
